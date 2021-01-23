@@ -1,26 +1,38 @@
 #!/bin/bash
 
 # - Bash script for automating web page word collection and making a wordlist
-
+# # Arguments: 
+# -m <min_word_length>        ---
+# -d <crawling_depth>
+# -o 	Follow links out of domain
+# -E <exclude_list_path>
+# -I <must_include_list_path>
+# -l    Convert words to lowercase
+# -c    Sanitize umlaut characters
+# -e    Grab e-mail addresses
+# -t <target_url>
+# -f <list_of_urls>
+# -v    Show verbose output
 
 verbose='false'
 minwordlength='5'
 depth=3
 offsite='false'
-includemail='false'
-excludelist='false'
-includelist='false'
-lowercase='false'
-convumlaut='false'
-
-targeturl=''
-urllist=''
-offsite_flag=''
-exclude_flag=''
-include_flag=''
-lowercase_flag=''
-convumlaut_flag=''
-mail_flag=''
+# includemail='false'
+# excludelist='false'
+# includelist='false'
+# lowercase='false'
+# convumlaut='false'
+# lowercase=''
+# convumlaut=''
+# targeturl=''
+# urllist=''
+# offsite_flag='false'
+# exclude_flag=''
+# include_flag=''
+# lowercase_flag=''
+# convumlaut_flag=''
+# mail_flag=''
 
 DateAndTime() { DateAndTime=$( date '+%d-%m-%Y | %H:%M:%S' ); echo -e "$DateAndTime"; }
 
@@ -34,7 +46,10 @@ function CewlCrawl {
 	dirname='RESULTS/'$( echo $targeturl | cut -d "/" -f3 )
 	mkdir -p $dirname
 	resultfile=$dirname'/'$( echo $targeturl | cut -d "/" -f3 )".txt"
-	sudo cewl -d $depth -m $minwordlength $offsite_flag $exclude_flag $include_flag -w $resultfile $lowercase_flag $convumlaut_flag $mail_flag $verbose_flag $targeturl;
+	# if not offsite
+	#sudo cewl -d $depth -m $minwordlength $offsite_flag $exclude_flag $include_flag -w $resultfile $lowercase_flag $convumlaut_flag $mail_flag $verbose_flag $targeturl;
+	# sudo cewl "$cewl_query_args" -w $resultfile $targeturl
+	sudo cewl -d $depth -m $minwordlength -o -w $resultfile --lowercase --convert-umlauts -v $targeturl;
 	
 	wordcount=$(< $resultfile wc -l)
 	echo "Finished crawling: "$line
@@ -44,48 +59,51 @@ function CewlCrawl {
 }
 
 count=0
-while getopts 'm:d:o:E:I:l:c:e:t:f:v' flag; do
+while getopts 'd:m:t:f' flag; do
 	case "${flag}" in
-
-    # Min word length
-    m) minwordlength="${OPTARG}"
-	echo "minwordlength_debug: " $minwordlength ###DEBUG
-	;;
 
 	# Depth of search
 	d) depth="${OPTARG}"
-	echo "depth_debug: " $depth ###DEBUG
 	;;
 
-	# Search offsite
-	o) offsite="true"
-	offsite_flag="-o"
+    # Min word length
+    m) minwordlength="${OPTARG}"
 	;;
 
-	# Exclude list location
-	E) excludelist="${OPTARG}"
-	exclude_flag="--exclude $excludelist"
-	;;
+	# # Search offsite
+	# o) offsite="true"
+	# #offsite_flag="-o"
+	# ;;
 
-	# Include list location
-	I) includelist="${OPTARG}"
-	include_flag="--include $includelist"
-	;;
+	# # Exclude list location
+	# E) excludelist="${OPTARG}"
+	# exclude_flag="--exclude $excludelist"
+	# cewl_query_args="$cewl_query_args $exclude_flag"
+	# ;;
 
-	# Convert all to lowercase
-	l) lowercase="true"
-	lowercase_flag="--lowercase"
-	;;
+	# # Include list location
+	# I) includelist="${OPTARG}"
+	# include_flag="--include $includelist"
+	# cewl_query_args="$cewl_query_args $include_flag"
+	# ;;
 
-	# Sanitize umlaut
-	c) convumlaut="true"
-	convumlaut_flag="--convert-umlauts"
-	;;
+	# # Convert all to lowercase
+	# l) lowercase="true"
+	# lowercase_flag="--lowercase"
+	# cewl_query_args="$cewl_query_args $lowercase_flag"
+	# ;;
 
-	# Include e-mail addresses
-	e) includemail="true"
-	mail_flag="-e"
-	;;	
+	# # Sanitize umlaut
+	# c) convumlaut="true"
+	# convumlaut_flag="--convert-umlauts"
+	# cewl_query_args="$cewl_query_args $convumlaut_flag"
+	# ;;
+
+	# # Include e-mail addresses
+	# e) includemail="true"
+	# mail_flag="-e"
+	# cewl_query_args="$cewl_query_args $mail_flag"
+	# ;;	
 
 	# Single URL
 	t) targeturl="${OPTARG}"
@@ -113,10 +131,11 @@ while getopts 'm:d:o:E:I:l:c:e:t:f:v' flag; do
 	done < "$input"
 	;;
 	
-	# Verbose output
-    v) verbose="true"
-	verbose_flag="-v"
-    ;;
+	# # Verbose output
+ #    v) verbose="true"
+	# verbose_flag="-v"
+	# echo "Verbose true"
+ #    ;;
 
 	*) print_usage
        exit 1 ;;
